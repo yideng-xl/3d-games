@@ -47,5 +47,3 @@ python3 -m http.server 8080
 地下七层和深潜原来用 jsDelivr 上的 Three.js。合集把对应版本放到 `vendor/three/`，并把这两份 HTML 里的地址改成站内相对路径，这样服务器不用再访问国外 CDN。Three.js 同样是 MIT，许可证在对应版本目录里。
 
 其余 HTML 与上游字节一致。
-
-Saltline（约 1.4 MB 的港口射击）没有明确开源许可，没有放进仓库。公开演示在 <https://realcodebear.github.io/saltline-fable-5.2/>。
