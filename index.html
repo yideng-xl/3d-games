@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>几十 KB 的 3D</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101614;
+      --card: #18211c;
+      --ink: #efe7d6;
+      --dim: #a39886;
+      --line: rgba(239, 231, 214, 0.14);
+      --accent: #e07a4a;
+      --sea: #7dbea5;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 500px at 10% -10%, rgba(224, 122, 74, 0.16), transparent 55%),
+        var(--bg);
+      color: var(--ink);
+      font: 16px/1.55 "Iowan Old Style", Palatino, "Songti SC", "Noto Serif SC", serif;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1080px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 48px 0 12px; }
+    .kicker {
+      margin: 0 0 8px;
+      font: 12px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sea);
+    }
+    h1 { margin: 0; font-size: clamp(40px, 6vw, 68px); font-weight: 560; letter-spacing: -0.03em; }
+    .lede { max-width: 42rem; margin: 14px 0 0; color: var(--dim); font-size: 18px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 18px; }
+    .filters button {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font: 13px/1.2 ui-sans-serif, system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .filters button[aria-pressed="true"] { background: var(--ink); color: #17201b; border-color: var(--ink); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; padding-bottom: 28px; }
+    article {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 16px 14px;
+      min-height: 280px;
+    }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill {
+      font: 12px/1.2 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      color: var(--dim);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+    .pill.game { color: var(--accent); border-color: rgba(224, 122, 74, 0.45); }
+    h2 { margin: 0; font-size: 28px; letter-spacing: -0.03em; }
+    .original { margin: -6px 0 0; color: var(--dim); font-size: 14px; }
+    p { margin: 0; }
+    .controls, .extra { color: var(--dim); font-size: 14px; }
+    .who { margin-top: auto; color: var(--dim); font-size: 13px; }
+    .who a { color: var(--sea); }
+    .actions { display: flex; gap: 8px; }
+    .actions a {
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font: 14px/1.2 ui-sans-serif, system-ui, sans-serif;
+    }
+    .actions a.primary { background: var(--accent); color: #1a100c; }
+    .actions a.ghost { border: 1px solid var(--line); }
+    footer { padding: 8px 0 48px; color: var(--dim); font-size: 14px; }
+    footer code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--ink); }
+    noscript { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="kicker">Single-file · WebGPU · MIT</p>
+      <h1>几十 KB 的 3D</h1>
+      <p class="lede">2026 年秋这批单文件小世界：一个 HTML 里装下一整座能走、能游、能飞的场景。画面和声音在打开时由代码生成，没有贴图包，也没有模型文件。</p>
+      <noscript>这个目录页需要 JavaScript。游戏本身在 <code>games/</code> 目录里，可以直接打开。</noscript>
+      <div class="filters" id="filters">
+        <button type="button" data-filter="all" aria-pressed="true">全部</button>
+        <button type="button" data-filter="small" aria-pressed="false">100 KB 以内</button>
+        <button type="button" data-filter="游戏" aria-pressed="false">能打的</button>
+        <button type="button" data-filter="漫游" aria-pressed="false">只逛的</button>
+      </div>
+    </header>
+    <main class="grid" id="grid"></main>
+    <footer>
+      <p>用桌面版 Chrome 或 Edge 打开。WebGPU 需要 HTTPS，或者本机的 localhost。手机上能开，帧数会低很多。</p>
+      <p>把整个目录当作静态网站即可。Nginx 把 root 指到这里，默认页是 <code>index.html</code>。</p>
+      <p>作品都是 MIT。上游文件除了两处 Three.js 地址，其余按原字节收录。Saltline 那份 1.4 MB 的港口射击没有明确许可，没有放进这个仓库。</p>
+    </footer>
+  </div>
+  <script src="games.js"></script>
+  <script>
+    const grid = document.querySelector("#grid");
+    const buttons = [...document.querySelectorAll("#filters button")];
+
+    function kb(n) {
+      const value = n / 1024;
+      return (value >= 100 ? value.toFixed(0) : value.toFixed(1)) + " KB";
+    }
+
+    function card(game) {
+      const node = document.createElement("article");
+      node.dataset.kind = game.kind;
+      node.dataset.bytes = String(game.bytes);
+      node.innerHTML = `
+        <div class="meta">
+          <span class="pill">${kb(game.bytes)}</span>
+          <span class="pill">${game.stack}</span>
+          <span class="pill${game.kind === "游戏" ? " game" : ""}">${game.kind}</span>
+        </div>
+        <h2>${game.title}</h2>
+        <p class="original">${game.original}</p>
+        <p>${game.blurb}</p>
+        <p class="controls">${game.controls}</p>
+        ${game.extra ? `<p class="extra">${game.extra}</p>` : ""}
+        <p class="who">${game.author}<br><a href="${game.repo}">上游仓库</a> · <a href="${game.license}">MIT</a></p>
+        <div class="actions">
+          <a class="primary" href="play.html?id=${game.id}">打开</a>
+          <a class="ghost" href="games/${game.id}/">独立页面</a>
+        </div>`;
+      return node;
+    }
+
+    TINY3D.forEach((game) => grid.append(card(game)));
+
+    function apply(filter) {
+      buttons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.filter === filter)));
+      grid.querySelectorAll("article").forEach((node) => {
+        const bytes = Number(node.dataset.bytes);
+        const show = filter === "all"
+          || (filter === "small" && bytes <= 100 * 1024)
+          || node.dataset.kind === filter;
+        node.hidden = !show;
+      });
+    }
+
+    buttons.forEach((button) => button.addEventListener("click", () => apply(button.dataset.filter)));
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>打开作品</title>
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; height: 100%; background: #070b09; color: #efe7d6; }
+    .bar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      background: #121816;
+      border-bottom: 1px solid rgba(239, 231, 214, 0.14);
+      font: 14px/1.2 ui-sans-serif, system-ui, sans-serif;
+    }
+    .bar a { color: #efe7d6; text-decoration: none; }
+    .back {
+      border: 1px solid rgba(239, 231, 214, 0.2);
+      border-radius: 999px;
+      padding: 5px 10px;
+      white-space: nowrap;
+    }
+    .title { font-weight: 650; white-space: nowrap; }
+    .hint {
+      color: #a39886;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .spacer { flex: 1; }
+    iframe { width: 100%; height: calc(100% - 48px); border: 0; background: #000; display: block; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="index.html">返回合集</a>
+    <span class="title" id="title">加载中</span>
+    <span class="hint" id="hint"></span>
+    <span class="spacer"></span>
+    <a id="solo" href="index.html">独立页面</a>
+  </div>
+  <iframe id="frame" title="作品" allow="fullscreen; pointer-lock; gamepad" allowfullscreen></iframe>
+  <script src="games.js"></script>
+  <script>
+    const id = new URLSearchParams(location.search).get("id");
+    const game = (window.TINY3D || []).find((item) => item.id === id);
+    if (!game) {
+      location.replace("index.html");
+    } else {
+    document.title = game.title;
+    document.querySelector("#title").textContent = game.title;
+    document.querySelector("#hint").textContent = game.controls;
+    const solo = document.querySelector("#solo");
+    solo.href = "games/" + game.id + "/";
+    solo.textContent = "独立页面";
+    document.querySelector("#frame").src = "games/" + game.id + "/index.html";
+    }
+  </script>
+</body>
+</html>
